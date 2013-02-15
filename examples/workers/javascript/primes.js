@@ -8,7 +8,7 @@
 var gamejs = require('gamejs');
 
 var handleEvent = function(event) {
-   if (event.type === gamejs.event.WORKER) {
+   if (event.type === gamejs.worker.WORKER_QUERY) {
       if (event.data.todo === 'nextprimes') {
          var foundPrime = false;
          var n = event.data.start;
@@ -24,10 +24,7 @@ var handleEvent = function(event) {
             if (x-- < 0) {
                primes.push(n);
                // found the next prime
-               gamejs.event.post({
-                  type: gamejs.event.WORKER_RESULT,
-                  data: {prime: n}
-               })
+               gamejs.event.post({prime: n});
                x = 10000;
             }
          };
@@ -41,6 +38,6 @@ gamejs.ready(function() {
       gamejs.event.get().forEach(handleEvent);
    }
 
-   gamejs.time.fpsCallback(tick, null, 1000)
+   gamejs.time.interval(tick)
 
 })

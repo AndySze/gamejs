@@ -25,27 +25,21 @@ function main() {
    primeWorker.post({
       todo: "nextprimes", start: startNumber
    });
-   // instead of using `Worker.post()` like above, you could also
-   // send the message via the normal gamejs.event queue:
-   /*
-   gamejs.event.post({
-      worker: primeWorker,
-      type: gamejs.event.WORKER,
-      data: {todo: "nextprimes", start: startNumber}
-   });
-   */
 
-   // wait for results...
    var yOffset = 50;
-   var handleEvent = function(event) {
-      if (event.type == gamejs.event.WORKER_RESULT) {
-         display.blit(font.render('Worker answered: ' + event.data.prime), [10, yOffset])
-         yOffset += 20;
-      }
-   }
-
    var tick = function(msDuration) {
-      gamejs.event.get().forEach(handleEvent);
+      // handle worker results if any
+      primeWorker.get().forEach(function(event) {
+         if (event.type === gamejs.worker.WORKER_RESULT) {
+            display.blit(font.render('Worker answered: ' + event.data.prime), [10, yOffset])
+            yOffset += 20;
+         } else if (event.type === gamejs.worker.WORKER_ERROR) {
+            // (contrieved since gamejs already logs worker erros)
+            gamejs.error('got an error!', event.lineno, event.message)
+         }
+      })
+      // good practice: consume all keyboard/mouse events
+      gamejs.event.get();
    };
    gamejs.time.interval(tick);
 }
